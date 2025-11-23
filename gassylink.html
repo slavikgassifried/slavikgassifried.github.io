@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIP</title>
+    <link rel="icon" type="image/jpeg" href="files/Gemini_Generated_Image_148w3c148w3c148w copy.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <header>
+        <h1>Thank you.</h1>
+        <p>slavikgassifried.github.io is shutting down completely. Start migrating to our new site today.</p>
+		<p>New link below.</p>
+    </header>
+
+    <div class="translate-wrapper">
+        <button id="translate-toggle" class="btn">Translate Page 🌐</button>
+        <div id="translate-popup" class="translate-popup hidden">
+            <div id="google_translate_element"></div>
+        </div>
+    </div>
+
+	<section>
+	
+	<h1>Our new website host</h1>
+		      <button class="btng" onClick="window.open('https://slavikgassifried.web.app', '_self')">New website</button>
+		
+	</section>
+
+    <script>
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({ pageLanguage: 'en' }, 'google_translate_element');
+        }
+
+        document.getElementById("translate-toggle").addEventListener("click", () => {
+            document.getElementById("translate-popup").classList.toggle("hidden");
+        });
+
+        document.getElementById("favgLink").addEventListener("click", e => {
+            e.preventDefault();
+            if (confirm("⚠️ WARNING ⚠️\\n\\nYou're about to open SLavik's fav gassyfried video.\\nIt may contain EXTREME gassiness 💨💨💨\\n\\nDo you still want to proceed?")) {
+                window.open("https://www.youtube.com/watch?v=eS7svjrghmc", "_blank");
+            } else {
+                alert("Good choice 😮‍💨 Stay away from the gas!");
+            }
+        });
+		
+	    /* Logic to show footer only on scroll bottom */
+    const footer = document.querySelector('footer');
+    window.addEventListener('scroll', () => {
+      // Calculate scroll position
+      const scrollY = window.scrollY || window.pageYOffset;
+      const visibleHeight = document.documentElement.clientHeight;
+      const totalHeight = document.documentElement.scrollHeight;
+      
+      // When the user scrolls within 100 pixels of the bottom, show the footer
+      const isNearBottom = (scrollY + visibleHeight) >= (totalHeight - 100);
+
+      if (isNearBottom) {
+        footer.classList.add('visible');
+      } else {
+        footer.classList.remove('visible');
+      }
+    });
+
+
+        /* Fix translate overlap */
+        window.addEventListener("load", () => {
+            const translate = document.querySelector(".translate-wrapper");
+            const navbar = document.querySelector(".navbar");
+            const offset = navbar.offsetHeight + 10;
+            translate.style.top = `${offset}px`;
+        });
+
+        /* Prevent cutoff scrolling */
+        document.body.style.overflowY = "auto";
+
+        document.getElementById("menu-toggle").addEventListener("click", function() {
+            const menuContainer = document.getElementById("menu-container");
+            menuContainer.classList.toggle("active");
+            this.setAttribute("aria-expanded", menuContainer.classList.contains("active"));
+        });
+    </script>
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+	  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1299695046006358"
+     crossorigin="anonymous"></script>
+
+</body>
+</html>

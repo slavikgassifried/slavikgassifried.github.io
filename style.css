@@ -1,0 +1,430 @@
+/* === BIONIC FART GREEN THEME (Adaptive Navbar + Footer Fix) === */
+
+/* Universal box-sizing */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  padding-bottom: 140px; /* space for footer */
+  font-family: 'Trebuchet MS', sans-serif;
+  background: radial-gradient(circle at center, #00ff00 0%, #004400 100%);
+  color: #0b0b0b;
+  text-align: center;
+  overflow-x: hidden;
+}
+
+/* Content stacking */
+header, section, .video-container, .audio-container, .fun-list {
+  z-index: 100;
+  position: relative;
+}
+
+h1, p {
+  position: relative;
+  z-index: 100;
+}
+
+/* === HEADER === */
+h1 {
+  color: #101010;
+  text-shadow: 0 0 10px #9eff00, 0 0 15px #8aff00;
+  font-size: 2.8em;
+  margin-top: 10px;
+  animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 10px #9eff00, 0 0 20px #8aff00; }
+  to { text-shadow: 0 0 25px #f5ff00, 0 0 45px #ffea00; }
+}
+
+p {
+  font-size: 1.2em;
+  color: #111;
+  margin-bottom: 20px;
+}
+
+/* === TRANSLATE === */
+.translate-wrapper {
+  position: fixed;
+  top: 120px;
+  right: 15px;
+  z-index: 1500;
+  text-align: right;
+}
+
+#google_translate_element {
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+}
+
+.translate-popup:not(.hidden) #google_translate_element {
+  visibility: visible;
+  height: auto;
+}
+
+.translate-popup {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #111;
+  border: 3px solid #9eff00;
+  border-radius: 8px;
+  box-shadow: 0 0 15px #7fff00;
+  display: inline-block;
+  max-width: 250px;
+}
+
+.translate-popup.hidden {
+  display: none;
+}
+
+.translate-popup .goog-te-gadget-simple {
+  background-color: #0a0 !important;
+  border: 1px solid #faff00 !important;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+/* === NAVBAR === */
+.navbar {
+  background-color: #0a0;
+  padding: 15px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: opacity 0.4s ease;
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.navbar-logo {
+  flex-shrink: 0;
+}
+
+.menu-container {
+  flex-grow: 1;
+  text-align: center;
+  margin: 0 auto;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.menu {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+/* Hamburger button */
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px 10px;
+  z-index: 1001;
+}
+
+.menu-toggle .bar {
+  display: block;
+  width: 30px;
+  height: 4px;
+  margin: 5px auto;
+  background-color: #9eff00;
+  border-radius: 2px;
+  transition: all 0.3s ease-in-out;
+}
+
+/* === BUTTONS === */
+.btn {
+  background-color: #111;
+  color: #9eff00;
+  padding: 10px 20px;
+  margin: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  border: none;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 16px;
+  text-align: center;
+  display: inline-block;
+  transition: background-color 0.3s, transform 0.2s ease-in-out;
+  box-shadow: 0 0 10px #7fff00;
+}
+
+.btn:hover {
+  background-color: #faff00;
+  color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px #faff00;
+}
+
+.btng {
+  background-color: #111;
+  color: #9eff00;
+  padding: 20px 30px;
+  margin: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  border: none;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.3s, transform 0.2s ease-in-out;
+  box-shadow: 0 0 10px #7fff00;
+}
+
+.btng:hover {
+  background-color: #faff00;
+  color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px #faff00;
+}
+
+.btng:active {
+  transform: translateY(1px);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* === GALLERY === */
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px auto;
+  max-width: 1400px;
+}
+
+.gallery img {
+  border: 4px solid #1aff00;
+  border-radius: 10px;
+  box-shadow: 0 0 25px #1aff00;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.gallery img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 35px #faff00;
+}
+
+/* Responsive gallery sizes - RESTORED TO ORIGINAL */
+@media (max-width: 600px) { .gallery img { width: 40%; } }
+@media (min-width: 601px) and (max-width: 1024px) { .gallery img { width: 30%; } }
+@media (min-width: 1025px) { .gallery img { width: 22%; } }
+
+/* === FUN LIST === */
+.fun-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.fun-list li {
+  display: inline-block;
+  background-color: #111;
+  color: #9eff00;
+  margin: 5px;
+  padding: 10px 20px;
+  border-radius: 25px;
+  box-shadow: 0 0 10px #70ff00;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* === VIDEO & AUDIO - UPDATED FOR THREE PER ROW === */
+.video-container, .audio-container {
+  display: flex; /* Back to flex */
+  flex-wrap: wrap; /* Allows wrapping to new rows */
+  justify-content: center; /* Centers items in a row */
+  gap: 15px; /* Adds space between videos */
+  margin: 20px auto;
+  max-width: 1400px;
+  z-index: 100;
+  position: relative;
+  /* text-align: center; Removed as flex handles centering */
+}
+
+video {
+  /* Set video width to slightly less than 33.33% for three per row */
+  width: calc(33.33% - 10px); 
+  max-width: none; /* Removing max-width ensures the calculation is honored */
+	max-height: 600px;
+  height: auto; 
+  border: 4px solid #1aff00;
+  border-radius: 10px;
+  box-shadow: 0 0 25px #1aff00;
+  transition: transform 0.3s, box-shadow 0.3s;
+  
+  display: block; 
+  margin: 0; /* Remove auto margin to let flex gap manage spacing */
+}
+
+video:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 35px #faff00;
+}
+
+audio {
+  max-width: 300px;
+  width: 100%;
+  margin: 5px;
+}
+/* -------------------------------------------------------------------------- */
+
+/* === FOOTER === */
+footer {
+  background-color: #0a0;
+  color: white;
+  padding: 10px 5px;
+  text-align: center;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  font-size: 16px;
+  z-index: 1002;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+}
+
+footer.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+footer a {
+  color: white;
+  text-decoration: none;
+  margin: 0 8px;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+/* === RESPONSIVE NAVBAR BEHAVIOR === */
+@media screen and (max-width: 6000px) {
+  .navbar-content {
+    flex-wrap: wrap;
+    padding: 0 10px;
+  }
+
+  .menu-toggle {
+    display: block;
+    box-shadow: 0 0 10px #7fff00;
+    border: 2px solid #7fff00;
+    border-radius: 5px;
+    margin-right: 10px;
+  }
+
+  .menu-container {
+    flex-basis: 100%;
+    margin-top: 10px;
+    text-align: left;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    background-color: rgba(0, 40, 0, 0.95);
+    border-top: 2px solid #9eff00;
+    border-radius: 10px;
+  }
+
+  .menu-container.active {
+    max-height: 90vh;
+    overflow-y: auto;
+    opacity: 1;
+    padding: 10px 0 20px 0;
+  }
+
+  .menu {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn {
+    width: 90%;
+    margin: 5px 0;
+  }
+  
+  .translate-wrapper {
+    top: 90px;
+    right: 10px;
+    transform: scale(0.9);
+    z-index: 2000;
+  }
+
+  .translate-popup {
+    max-width: 200px;
+    right: 0;
+    margin-top: 5px;
+  }
+
+  /* Optional: Force three videos per row on very small screens */
+  @media (max-width: 600px) {
+      video {
+          width: 30%; 
+      }
+  }
+}
+
+
+/* === VIDEO RESPONSIVE SIZES to match GALLERY IMG === */
+/* All specific width overrides for video are REMOVED (or made full-width) to ensure the 50% rule is honored */
+/* The main video: width: calc(50% - 10px); rule handles the two-per-row layout for larger screens. */
+/* Removed previous media queries that enforced 40%, 30%, 22% */
+
+
+/* === ICON OVERRIDES === */
+#gassyLinkIcon, #mediglareIcon, #gassyhubIcon {
+  transition: none !important;
+  transform: none !important;
+}
+
+#gassyLinkIcon {
+  width: 256px;
+  height: 256px;
+  max-width: 256px !important;
+}
+
+#gassyhubIcon {
+  width: 256px;
+  height: 256px;
+  max-width: 256px !important;
+}
+
+#mediglareIcon {
+  height: 256px;
+  max-width: 768px !important;
+}
+
+
+/* stuff for gassyhub */
+#gassyhub {
+  transition: none !important;
+  transform: none !important;
+}
+
+#gassyhub {
+  width: auto;
+  height: auto;
+  max-width: 1200px !important;
+}

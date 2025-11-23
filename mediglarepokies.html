@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  	<link rel="icon" type="image/jpeg" href="files/mediglare.png" />
+    <title>Mediglare Pokies Machine 💨</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font import for the arcade look */
+        @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;700;900&display=swap');
+        
+        /* Custom styles for the slot machine look */
+        .slot-body {
+            background: linear-gradient(145deg, #a73737, #7a2525);
+            border: 10px solid #ffde00;
+            box-shadow: 0 0 40px rgba(255, 222, 0, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.5);
+            font-family: 'Bungee', cursive;
+            min-height: 480px;
+        }
+
+        .reels-container {
+            border: 5px solid #ffde00;
+            background-color: #000000;
+            box-shadow: inset 0 0 15px rgba(255, 222, 0, 0.7);
+        }
+
+        .reel {
+            width: 90px;
+            height: 90px;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+            margin: 0 4px;
+        }
+
+        .symbols {
+            display: flex;
+            flex-direction: column;
+            transition: transform 1s cubic-bezier(0.19, 1, 0.22, 1); /* Ease-out cubic for smooth stop */
+        }
+
+        .symbol {
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            transition: opacity 0.3s;
+        }
+
+        .spinning .symbols {
+            transition: none; /* Disable transition during fast spinning */
+            animation: fastSpin 0.1s linear infinite;
+        }
+
+        @keyframes fastSpin {
+            from { transform: translateY(0); }
+            to { transform: translateY(-100%); }
+        }
+
+        .glow {
+            animation: glow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px #fff, 0 0 10px #ffde00; }
+            to { text-shadow: 0 0 20px #fff, 0 0 30px #ffde00; }
+        }
+        
+        .slot-btn {
+            @apply w-full py-3 rounded-lg font-bold transition duration-150;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 min-h-screen flex items-center justify-center p-4 font-inter">
+
+    <!-- MODAL CONTAINER (for Welcome and Save/Load) -->
+    <div id="game-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center hidden">
+        <div id="modal-content" class="bg-gray-800 p-8 rounded-xl shadow-2xl max-w-sm text-center text-white transform scale-100 transition-transform duration-300">
+            <!-- Content filled by JavaScript -->
+        </div>
+    </div>
+    <!-- END MODAL -->
+
+
+    <div class="slot-body w-full max-w-2xl mx-auto p-6 rounded-3xl text-white flex flex-col items-center">
+        
+        <!-- Header & Balance -->
+        <h1 class="text-4xl text-yellow-400 mb-2 mt-2 text-center">MEDIGLAREPOKIES</h1>
+
+        <div class="flex flex-row justify-between w-full mb-2 text-lg p-2 bg-gray-900 bg-opacity-30 rounded-lg border border-yellow-400">
+            <span>Balance:</span>
+            <span id="balance-value" class="text-2xl text-yellow-300 font-extrabold">$0.00</span>
+        </div>
+        <div class="text-sm text-gray-200 mb-4">
+            Current Slot: <span id="current-slot-display" class="font-bold text-yellow-300">A</span>
+        </div>
+
+        <!-- Bet Selection -->
+        <div class="flex flex-row justify-between w-full mb-4 text-lg p-2 bg-gray-900 bg-opacity-30 rounded-lg border border-yellow-400">
+            <span>Current Bet:</span>
+            <select id="bet-selector" class="bg-gray-700 text-yellow-300 rounded-md p-1 font-bold min-w-[275px]">
+                <option value="10">10 Concrete</option>
+                <option value="50">50 Concrete</option>
+                <option value="100">100 Concrete</option>
+                <option value="500">500 Concrete</option>
+                <option value="750">750 Concrete</option>
+				<option value="1000">1000 Concrete</option>
+            </select>
+        </div>
+
+
+        <!-- Reels Display Area -->
+        <div class="reels-container flex justify-center p-3 rounded-xl mb-8">
+            <div class="reel" id="reel1"></div>
+            <div class="reel" id="reel2"></div>
+            <div class="reel" id="reel3"></div>
+        </div>
+
+        <!-- Spin Button -->
+        <button 
+            id="spin-button" 
+            disabled 
+            class="w-full py-4 text-3xl rounded-xl font-bold uppercase transition duration-300 transform 
+                   bg-green-600 hover:bg-green-500 text-white 
+                   active:scale-95 disabled:bg-gray-500 disabled:cursor-not-allowed disabled:shadow-none"
+        >
+            SPIN THE GAS
+        </button>
+
+        <!-- Save/Load/Reset Buttons -->
+        <div class="mt-4 flex gap-2 w-full justify-center">
+            <button id="show-save-btn" class="flex-1 py-2 text-sm rounded-lg bg-red-600 hover:bg-red-500 text-white font-bold transition">
+                SAVE/LOAD
+            </button>
+            <button id="reset-game-btn" class="flex-1 py-2 text-sm rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-bold transition">
+                RESET CURRENT SLOT
+            </button>
+        </div>
+
+        <!-- Message Box -->
+        <div id="message-box" class="mt-4 h-12 text-lg text-center font-extrabold text-white">
+            Initializing Game...
+        </div>
+
+        <!-- Status & User ID -->
+        <div class="mt-6 text-xs text-gray-300 border-t border-gray-700 pt-4 w-full text-center">
+            <p>Status: <span class="text-yellow-300">Data stored locally in your browser.</span></p>
+            <p>Current Key: <span id="current-key-display" class="text-yellow-300">...</span></p>
+        </div>
+
+    </div>
+
+    <!-- Local Storage Logic & Game Script -->
+    <script>
+        
+        // --- Local Storage & Game State Setup ---
+        const INITIAL_BALANCE = 5000;
+        let currentBalance = INITIAL_BALANCE;
+        let BET_AMOUNT = 10;
+        let currentSlot = 'A'; // Start on slot A
+        const SLOT_KEYS = ['A', 'B', 'C'];
+        const BALANCE_PREFIX = 'pokies_balance_';
+        const FIRST_TIME_KEY = 'pokies_first_time'; // For the welcome modal
+
+        // Display elements
+        const balanceDisplay = document.getElementById('balance-value');
+        const spinButton = document.getElementById('spin-button');
+        const messageBox = document.getElementById('message-box');
+        const betSelector = document.getElementById('bet-selector');
+        const currentSlotDisplay = document.getElementById('current-slot-display');
+        const currentKeyDisplay = document.getElementById('current-key-display');
+        const modal = document.getElementById('game-modal');
+        const modalContent = document.getElementById('modal-content');
+        
+        // --- Helper Functions ---
+        
+        function getBalanceKey(slot) {
+            return BALANCE_PREFIX + slot;
+        }
+
+        function updateBalanceInUI(newBalance, message = '') {
+            currentBalance = newBalance;
+            balanceDisplay.textContent = newBalance.toFixed(2);
+            messageBox.innerHTML = message;
+
+            if (message.includes('WINNER') || message.includes('JACKPOT')) {
+                messageBox.classList.add('glow', 'text-yellow-400');
+            } else {
+                messageBox.classList.remove('glow', 'text-yellow-400');
+            }
+        }
+        
+        // --- Save/Load Core Logic ---
+
+        function saveBalance() {
+            try {
+                const key = getBalanceKey(currentSlot);
+                localStorage.setItem(key, currentBalance.toFixed(2));
+                // Optional console log for debugging
+                console.log(`Saved balance ${currentBalance.toFixed(2)} to ${key}`);
+            } catch (e) {
+                console.error("Error saving balance to Local Storage: ", e);
+            }
+        }
+
+        function loadBalance(slotToLoad) {
+            currentSlot = slotToLoad;
+            const key = getBalanceKey(currentSlot);
+            currentSlotDisplay.textContent = currentSlot;
+            currentKeyDisplay.textContent = key;
+            
+            let message = `Switched to Slot ${currentSlot}.`;
+
+            try {
+                const storedBalance = localStorage.getItem(key);
+                
+                if (storedBalance !== null && !isNaN(parseFloat(storedBalance))) {
+                    currentBalance = parseFloat(storedBalance);
+                    message += ` Loaded balance: $${currentBalance.toFixed(2)}`;
+                } else {
+                    // Initialize if slot is empty
+                    currentBalance = INITIAL_BALANCE;
+                    localStorage.setItem(key, INITIAL_BALANCE.toFixed(2));
+                    message += ` New game started with ${INITIAL_BALANCE}$`;
+                }
+                updateBalanceInUI(currentBalance, message);
+                saveBalance(); // Ensure the current state is written back
+            } catch (e) {
+                console.error("Error loading balance from Local Storage: ", e);
+                updateBalanceInUI(INITIAL_BALANCE, '<span class="text-red-500">Error loading data. Playing offline.</span>');
+            }
+        }
+
+        function resetCurrentSlot() {
+             const key = getBalanceKey(currentSlot);
+             localStorage.removeItem(key);
+             loadBalance(currentSlot); // Reloads with initial balance
+             closeModal();
+             updateBalanceInUI(currentBalance, `Slot ${currentSlot} has been reset!`);
+        }
+
+        // --- Modal Handlers ---
+
+        function showModal(contentHtml) {
+            modalContent.innerHTML = contentHtml;
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        function showWelcomeMessage() {
+            const html = `
+                <h3 class="text-3xl font-bold text-yellow-400 mb-4 font-bungee">GASSYLINK POKIES!</h3>
+                <p class="text-lg text-gray-200 font-inter leading-relaxed mb-6">
+                    "ay cuz u got ur medicare card? fkn rip off the dogs with some fake medical payments and lets use the money to gamble off some fuckin concrete brah" - ya brother moey
+                </p>
+                <p class="text-xs text-gray-400 mb-4">
+                    Your progress is saved automatically to the current slot (A, B, or C).
+                </p>
+                <button id="close-modal-btn" class="slot-btn bg-green-500 text-white hover:bg-green-600 active:scale-95">
+                    Start Gassinating!
+                </button>
+            `;
+            showModal(html);
+            document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+        }
+
+        function getSlotStatus(slot) {
+            const key = getBalanceKey(slot);
+            const storedBalance = localStorage.getItem(key);
+            
+            if (storedBalance !== null && !isNaN(parseFloat(storedBalance))) {
+                const balance = parseFloat(storedBalance).toFixed(2);
+                return `<span class="text-green-400">$${balance}</span>`;
+            } else {
+                return '<span class="text-red-400">EMPTY / NEW GAME</span>';
+            }
+        }
+
+        function showSaveLoadModal() {
+            let html = `
+                <h3 class="text-3xl font-bold text-yellow-400 mb-6 font-bungee">SAVE SLOTS</h3>
+                <div class="space-y-4 mb-6">
+            `;
+
+            SLOT_KEYS.forEach(slot => {
+                const status = getSlotStatus(slot);
+                const isCurrent = slot === currentSlot;
+                const buttonClass = isCurrent ? 'bg-red-600 hover:bg-red-500 ring-2 ring-yellow-400' : 'bg-gray-700 hover:bg-gray-600';
+
+                html += `
+                    <div class="p-3 rounded-lg border ${isCurrent ? 'border-yellow-400' : 'border-gray-600'}">
+                        <p class="text-lg font-bold mb-2">Slot ${slot} ${isCurrent ? '(Active)' : ''}</p>
+                        <p class="text-sm">Balance: ${status}</p>
+                        <button 
+                            id="slot-load-${slot}" 
+                            data-slot="${slot}" 
+                            class="slot-btn mt-2 ${buttonClass} text-white"
+                        >
+                            ${isCurrent ? 'Current Game' : 'Load Slot ' + slot}
+                        </button>
+                    </div>
+                `;
+            });
+
+            html += `
+                </div>
+                <button id="close-save-modal-btn" class="slot-btn bg-gray-500 text-white hover:bg-gray-400">
+                    Close
+                </button>
+            `;
+
+            showModal(html);
+
+            // Add event listeners for slot buttons
+            SLOT_KEYS.forEach(slot => {
+                const loadBtn = document.getElementById(`slot-load-${slot}`);
+                loadBtn.addEventListener('click', (e) => {
+                    loadBalance(e.target.dataset.slot);
+                    closeModal();
+                });
+            });
+
+            document.getElementById('close-save-modal-btn').addEventListener('click', closeModal);
+        }
+        
+        // --- Slot Machine Logic ---
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBalance(currentSlot); // Load initial balance for slot A
+
+            const reels = [
+                document.getElementById('reel1'),
+                document.getElementById('reel2'),
+                document.getElementById('reel3'),
+            ];
+            const SYMBOLS = ['🍒', '🍊', '🔔', '💎', '7️⃣'];
+            const SYMBOL_HEIGHT = 90; // Must match CSS
+
+            // Initialize BET_AMOUNT from selector and listen for changes
+            BET_AMOUNT = parseInt(betSelector.value);
+            betSelector.addEventListener('change', (e) => {
+                BET_AMOUNT = parseInt(e.target.value);
+            });
+
+            // Check for first-time play (after setting initial balance if needed)
+            if (localStorage.getItem(FIRST_TIME_KEY) === null) {
+                localStorage.setItem(FIRST_TIME_KEY, 'true'); // Set flag immediately
+                showWelcomeMessage(); 
+            }
+
+            // Enable spin button after loading
+            spinButton.disabled = false;
+            
+            // UI Button Listeners
+            document.getElementById('show-save-btn').addEventListener('click', showSaveLoadModal);
+            document.getElementById('reset-game-btn').addEventListener('click', () => {
+                if (currentBalance > 0) {
+                    // Simple message instead of a confirmation box (no alert/confirm allowed)
+                    showModal(`
+                        <h3 class="text-3xl font-bold text-red-500 mb-4 font-bungee">WARNING!</h3>
+                        <p class="text-lg text-gray-200 leading-relaxed mb-6">
+                            Are you sure you want to reset Slot ${currentSlot}? This will wipe out your current balance of $${currentBalance.toFixed(2)} and start a new game!
+                        </p>
+                        <button id="confirm-reset-btn" class="slot-btn bg-red-600 text-white hover:bg-red-500 active:scale-95">
+                            YES, Reset Slot ${currentSlot}
+                        </button>
+                        <button id="cancel-reset-btn" class="slot-btn bg-gray-600 text-white hover:bg-gray-500 mt-2">
+                            NO, Cancel
+                        </button>
+                    `);
+                    document.getElementById('confirm-reset-btn').addEventListener('click', resetCurrentSlot);
+                    document.getElementById('cancel-reset-btn').addEventListener('click', closeModal);
+                } else {
+                     resetCurrentSlot(); // Reset without warning if balance is 0
+                }
+            });
+
+            // Generate symbol strips inside each reel
+            function populateReels() {
+                reels.forEach(reel => {
+                    const container = document.createElement('div');
+                    container.className = 'symbols';
+                    
+                    // Generate a long strip of symbols for smooth spinning
+                    for (let i = 0; i < SYMBOLS.length * 20; i++) { 
+                        const symbolDiv = document.createElement('div');
+                        symbolDiv.className = 'symbol';
+                        symbolDiv.textContent = SYMBOLS[i % SYMBOLS.length];
+                        container.appendChild(symbolDiv);
+                    }
+                    reel.appendChild(container);
+                });
+            }
+
+            populateReels();
+
+
+            function checkWin(results) {
+                const [r1, r2, r3] = results;
+                let winAmount = 0;
+                let message = 'No Match. Try again!';
+                
+                const Payouts = {
+                    '7️⃣': { match3: 100, match2: 5 },
+                    '💎': { match3: 50, match2: 3 },
+                    '🔔': { match3: 20, match2: 2 },
+                    '🍒': { match3: 10, match2: 1 },
+                    '🍊': { match3: 10, match2: 1 }
+                };
+                
+                if (r1 === r2 && r2 === r3) {
+                    const symbol = r1;
+                    const multiplier = Payouts[symbol]?.match3 || 10;
+                    winAmount = BET_AMOUNT * multiplier;
+                    message = symbol === '7️⃣' ? `<span class="text-yellow-400">GASSY JACKPOT! ${winAmount}$ WINNER!</span>` : `${symbol}x3! ${winAmount}$ WINNER!`;
+                } 
+                else if (r1 === r2 || r2 === r3) {
+                    const symbol = (r1 === r2) ? r1 : r2;
+                    const multiplier = Payouts[symbol]?.match2 || 1;
+                    if (multiplier > 1) { 
+                        winAmount = BET_AMOUNT * multiplier;
+                        message = `2x ${symbol} Match! ${winAmount}$ Win!`;
+                    }
+                }
+                
+                return { winAmount, message };
+            }
+
+            function getFinalSymbol(reelIndex, stopIndex) {
+                // The result is the symbol one step below the target stop index 
+                // because the target is centered in the viewport of the reel container
+                return SYMBOLS[(stopIndex) % SYMBOLS.length]; 
+            }
+
+            // The main game loop
+            spinButton.addEventListener('click', async () => {
+                if (currentBalance < BET_AMOUNT) {
+                    messageBox.innerHTML = `<span class="text-red-500">Insufficient funds! ${BET_AMOUNT}$ required.</span>`;
+                    return;
+                }
+
+                // 1. Deduct bet and disable button
+                updateBalanceInUI(currentBalance - BET_AMOUNT, 'Spinning...');
+                spinButton.disabled = true;
+                
+                // 2. Prepare the reels for spinning
+                const spinPromises = [];
+                const finalResults = [];
+
+                reels.forEach((reel, index) => {
+                    const symbolsContainer = reel.querySelector('.symbols');
+                    symbolsContainer.classList.add('spinning');
+                    
+                    // Reset transform before starting the fast spin effect
+                    symbolsContainer.style.transform = 'translateY(0)';
+                    symbolsContainer.ontransitionend = null; 
+
+                    // Randomly determine which symbol index will stop in the center of the reel
+                    const stopSymbolIndex = Math.floor(Math.random() * SYMBOLS.length);
+                    // Add padding spins to make the animation last longer and feel random
+                    const totalSpinPositions = SYMBOLS.length * 10; 
+                    const finalStopIndex = totalSpinPositions + stopSymbolIndex; 
+                    
+                    // The final Y position is negative distance for the symbol to land in the center.
+                    // Since the reel shows 3 symbols, the target is the middle one.
+                    // We need to stop at the symbol *above* the target.
+                    // The CSS positions symbols from top (index 0) down. 
+                    // To center the stopSymbolIndex, we target the position where the symbol *before* it lands at the top border.
+                    const finalY = -1 * (finalStopIndex * SYMBOL_HEIGHT);
+                    
+                    finalResults[index] = getFinalSymbol(index, stopSymbolIndex);
+
+                    // Delay subsequent reels
+                    const delay = 100 + (index * 500); 
+                    const duration = 2 + (index * 0.5); // Staggered duration
+
+                    spinPromises.push(new Promise((resolve) => {
+                        setTimeout(() => {
+                            symbolsContainer.classList.remove('spinning');
+                            symbolsContainer.style.transitionDuration = `${duration}s`;
+                            symbolsContainer.style.transform = `translateY(${finalY}px)`;
+                            
+                            symbolsContainer.ontransitionend = () => {
+                                resolve();
+                            };
+                        }, delay);
+                    }));
+                });
+
+                // 3. Wait for all reels to stop
+                await Promise.all(spinPromises);
+
+                // 4. Check results and update balance
+                const { winAmount, message } = checkWin(finalResults);
+                
+                updateBalanceInUI(currentBalance + winAmount, message);
+                saveBalance(); // Save balance to Local Storage
+
+                // 5. Re-enable button
+                spinButton.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>
